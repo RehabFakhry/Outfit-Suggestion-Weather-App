@@ -15,16 +15,13 @@ import androidx.core.content.ContextCompat
 import com.example.outfitsuggestionweatherapp.R
 import com.example.outfitsuggestionweatherapp.data.source.ImageOutfits
 import com.example.outfitsuggestionweatherapp.data.source.LottieAnimations
-import com.example.outfitsuggestionweatherapp.data.weatherModel.WeatherDetails
+import com.example.outfitsuggestionweatherapp.data.source.WeatherDataFetcher
 import com.example.outfitsuggestionweatherapp.data.weatherModel.WeatherResponse
 import com.example.outfitsuggestionweatherapp.databinding.ActivityMainBinding
 import com.example.outfitsuggestionweatherapp.utils.Constants
 import com.example.outfitsuggestionweatherapp.utils.ImagePreferenceManager
 import com.google.android.gms.location.*
-import com.google.gson.Gson
 import okhttp3.*
-import okhttp3.logging.HttpLoggingInterceptor
-import java.io.IOException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -34,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private lateinit var imagePreferenceManager: ImagePreferenceManager
+    private lateinit var weatherDataFetcher: WeatherDataFetcher
     private val locationRequest = LocationRequest().apply {
         interval = 10000
         fastestInterval = 5000
@@ -47,40 +45,25 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         getCurrentDateAndDay()
 
+        weatherDataFetcher = WeatherDataFetcher()
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
             @SuppressLint("SetTextI18n")
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 val location = locationResult.lastLocation ?: return
-                getWeatherData(
+                weatherDataFetcher.getWeatherData(
                     location.latitude, location.longitude
                 ) { weatherResponse, exception ->
                     runOnUiThread {
                         updateUIWithWeatherDetails(weatherResponse, exception)
                         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-                    } } } } }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateUIWithWeatherDetails(
-        weatherResponse: WeatherResponse?, exception: Exception?
-    ) {
-        if (exception != null) {
-            binding.textViewTemperature.text = getString(R.string.failed_to_get_weather)
-        } else {
-            val cityName = weatherResponse?.name ?: "N/A"
-            val temp = weatherResponse?.main?.temp ?: 0.0f
-            val humidity = weatherResponse?.main?.humidity ?: 0
-            val pressure = weatherResponse?.main?.pressure?.toInt()
-            val feelsLike = weatherResponse?.main?.feelsLike ?: 0.0f
-            clothesRecommendation(temp.toInt(), this@MainActivity)
-            with(binding) {
-                textViewTemperature.text = "$temp°C"
-                textViewCityName.text = "$cityName"
-                textViewFeelsLike.text = "$feelsLike\nFeels like"
-                textViewPressure.text = "$pressure\n Pressure"
-                textViewHumidity.text = "$humidity%\n Humidity"
-            } } }
+                    }
+                }
+            }
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onStart() {
@@ -103,47 +86,32 @@ class MainActivity : AppCompatActivity() {
             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationProviderClient.requestLocationUpdates(
                 locationRequest, locationCallback, Looper.getMainLooper()
-            ) } }
+            )
+        }
+    }
 
-    private fun getWeatherData(
-        latitude: Double, longitude: Double, callback: (WeatherResponse?, Exception?) -> Unit
+    @SuppressLint("SetTextI18n")
+    private fun updateUIWithWeatherDetails(
+        weatherResponse: WeatherResponse?, exception: Exception?
     ) {
-        val url =
-            "${Constants.BASE_URL}$latitude&lon=$longitude" + "&appid=${Constants.API_KEY}&units=metric"
-        val client = OkHttpClient.Builder().addInterceptor(
-                HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-            ).build()
-        val request = Request.Builder().url(url).build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                callback(null, e) }
-
-            override fun onResponse(call: Call, response: Response) {
-                try {
-                    val responseBody: ResponseBody? = response.body
-                    if (responseBody != null) {
-                        val json = responseBody.string()
-                        val dataResult = Gson().fromJson(json, WeatherResponse::class.java)
-                        val weatherResponse = parseWeatherResponse(dataResult)
-                        callback(weatherResponse, null)
-                    } else {
-                        callback(null, Exception("Response body is null"))
-                    }
-                } catch (e: Exception) {
-                    callback(null, e)
-                } } }) }
-
-    fun parseWeatherResponse(jsonData: WeatherResponse): WeatherResponse? {
-        return try {
-            val cityName = jsonData.name
-            val temp = jsonData.main.temp
-            val feelsLike = jsonData.main.feelsLike
-            val pressure = jsonData.main.pressure
-            val humidity = jsonData.main.humidity
-            WeatherResponse(WeatherDetails(temp, feelsLike, pressure, humidity), cityName)
-        } catch (e: Exception) {
-            null  } }
+        if (exception != null) {
+            binding.textViewTemperature.text = getString(R.string.failed_to_get_weather)
+        } else {
+            val cityName = weatherResponse?.name ?: "N/A"
+            val temp = weatherResponse?.main?.temp ?: 0.0f
+            val humidity = weatherResponse?.main?.humidity ?: 0
+            val pressure = weatherResponse?.main?.pressure?.times(1.0)
+            val feelsLike = weatherResponse?.main?.feelsLike ?: 0.0f
+            clothesRecommendation(temp.toInt(), this@MainActivity)
+            with(binding) {
+                textViewTemperature.text = "$temp°C"
+                textViewCityName.text = "$cityName"
+                textViewFeelsLike.text = "$feelsLike\nFeels like"
+                textViewPressure.text = "${pressure} mmHg\n Pressure"
+                textViewHumidity.text = "$humidity%\n Humidity"
+            }
+        }
+    }
 
     private fun clothesRecommendation(temperature: Int, context: Context) {
         val outfitList = when {
