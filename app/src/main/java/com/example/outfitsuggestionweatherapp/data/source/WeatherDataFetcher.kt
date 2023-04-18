@@ -31,8 +31,7 @@ class WeatherDataFetcher {
                     if (responseBody != null) {
                         val json = responseBody.string()
                         val dataResult = Gson().fromJson(json, WeatherResponse::class.java)
-                        val weatherResponse = parseWeatherResponse(dataResult)
-                        callback(weatherResponse, null)
+                        callback(dataResult, null)
                     } else {
                         callback(null, Exception("Response body is null"))
                     }
@@ -42,17 +41,4 @@ class WeatherDataFetcher {
             }
         })
     }
-
-    private fun parseWeatherResponse(jsonData: WeatherResponse): WeatherResponse? {
-        return try {
-            val cityName = jsonData.name
-            val temp = jsonData.main.temp
-            val feelsLike = jsonData.main.feelsLike
-            val pressure = jsonData.main.pressure
-            val humidity = jsonData.main.humidity
-            WeatherResponse(WeatherDetails(temp, feelsLike, pressure, humidity), cityName)
-        } catch (e: Exception) {
-            null
-        }
     }
-}
