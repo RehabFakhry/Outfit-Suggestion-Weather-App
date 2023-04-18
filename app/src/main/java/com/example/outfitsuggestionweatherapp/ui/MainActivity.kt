@@ -1,24 +1,18 @@
 package com.example.outfitsuggestionweatherapp.ui
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.example.outfitsuggestionweatherapp.R
 import com.example.outfitsuggestionweatherapp.data.source.ImageOutfits
 import com.example.outfitsuggestionweatherapp.data.source.LottieAnimations
 import com.example.outfitsuggestionweatherapp.data.source.WeatherDataFetcher
 import com.example.outfitsuggestionweatherapp.data.weatherModel.WeatherResponse
 import com.example.outfitsuggestionweatherapp.databinding.ActivityMainBinding
-import com.example.outfitsuggestionweatherapp.utils.Constants
 import com.example.outfitsuggestionweatherapp.utils.ImagePreferenceManager
 import com.google.android.gms.location.*
 import okhttp3.*
@@ -28,70 +22,28 @@ import java.time.format.DateTimeFormatter
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
     private lateinit var imagePreferenceManager: ImagePreferenceManager
     private lateinit var weatherDataFetcher: WeatherDataFetcher
-    private val locationRequest = LocationRequest().apply {
-        interval = 10000
-        fastestInterval = 5000
-        LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
+    private lateinit var locationUpdater: LocationManager
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         super.onStart()
         getCurrentDateAndDay()
-
         weatherDataFetcher = WeatherDataFetcher()
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        locationCallback = object : LocationCallback() {
-            @SuppressLint("SetTextI18n")
-            override fun onLocationResult(locationResult: LocationResult) {
-                super.onLocationResult(locationResult)
-                val location = locationResult.lastLocation ?: return
-                weatherDataFetcher.getWeatherData(
-                    location.latitude, location.longitude
-                ) { weatherResponse, exception ->
-                    runOnUiThread {
-                        updateUIWithWeatherDetails(weatherResponse, exception)
-                        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-                    }
-                }
-            }
-        }
+        locationUpdater = LocationManager(this, WeatherDataFetcher())
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     override fun onStart() {
         super.onStart()
-        checkLocationPermission()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun checkLocationPermission() {
-        val permission = ACCESS_FINE_LOCATION
-        if (ContextCompat.checkSelfPermission(
-                this,
-                ACCESS_FINE_LOCATION,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(permission), Constants.LOCATION_PERMISSION_REQUEST_CODE
-            )
-        } else {
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-            fusedLocationProviderClient.requestLocationUpdates(
-                locationRequest, locationCallback, Looper.getMainLooper()
-            )
-        }
+        locationUpdater.startLocationUpdates()
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateUIWithWeatherDetails(
+    fun updateUIWithWeatherDetails(
         weatherResponse: WeatherResponse?, exception: Exception?
     ) {
         if (exception != null) {
