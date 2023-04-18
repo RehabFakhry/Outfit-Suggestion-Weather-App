@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var imagePreferenceManager: ImagePreferenceManager
     private lateinit var weatherDataFetcher: WeatherDataFetcher
-    private lateinit var locationUpdater: LocationManager
+    private lateinit var locationManager: LocationManager
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,12 +34,12 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         getCurrentDateAndDay()
         weatherDataFetcher = WeatherDataFetcher()
-        locationUpdater = LocationManager(this, WeatherDataFetcher())
+        locationManager = LocationManager(this, WeatherDataFetcher())
     }
 
     override fun onStart() {
         super.onStart()
-        locationUpdater.startLocationUpdates()
+        locationManager.startLocationUpdates()
     }
 
     @SuppressLint("SetTextI18n")
