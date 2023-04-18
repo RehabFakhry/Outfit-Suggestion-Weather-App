@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.outfitsuggestionweatherapp.R
 import com.example.outfitsuggestionweatherapp.data.source.ImageOutfits
 import com.example.outfitsuggestionweatherapp.data.source.LottieAnimations
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         super.onStart()
@@ -69,22 +71,22 @@ class MainActivity : AppCompatActivity() {
         val outfitList = when {
             (temperature < 0 || temperature in 0..20) -> {
                 binding.textViewDescription.text = getString(R.string.cold_weather)
-                LottieAnimations.winterAnimation
+//                LottieAnimations.winterAnimation
                 ImageOutfits.winterOutfits
             }
             temperature in 20..30 -> {
                 binding.textViewDescription.text = getString(R.string.autumn_weather)
-                LottieAnimations.autumnAnimation
+//                LottieAnimations.autumnAnimation
                 ImageOutfits.autumnOutfits
             }
             temperature in 30..35 -> {
-                binding.textViewDescription.text = getString(R.string.sunny_weather)
-                LottieAnimations.springAnimation
+                binding.textViewDescription.text = getString(R.string.hot_weather)
+//                LottieAnimations.springAnimation
                 ImageOutfits.springOutfits
             }
             temperature in 35..40 -> {
-                binding.textViewDescription.text = getString(R.string.sunny_weather)
-                LottieAnimations.summerAnimation
+                binding.textViewDescription.text = getString(R.string.hot_weather)
+//                LottieAnimations.summerAnimation
                 ImageOutfits.summerOutfits
             }
             else -> {

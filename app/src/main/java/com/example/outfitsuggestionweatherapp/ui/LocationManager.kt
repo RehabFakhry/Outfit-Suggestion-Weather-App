@@ -2,9 +2,13 @@ package com.example.outfitsuggestionweatherapp.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Looper
+import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.outfitsuggestionweatherapp.data.source.WeatherDataFetcher
@@ -38,7 +42,6 @@ class LocationManager (private val context: Context, private val weatherDataFetc
                 }
             }
         }
-
         if (ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -55,6 +58,17 @@ class LocationManager (private val context: Context, private val weatherDataFetc
                 locationCallback,
                 Looper.getMainLooper()
             )
+//            AlertDialog.Builder(context)
+//                .setTitle("Enable location")
+//                .setMessage("Please enable location access in order to use this Application.")
+//                .setPositiveButton("Settings") { _, _ ->
+//                    // Open the app's location settings
+//                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+//                    intent.data = Uri.fromParts("package", context.packageName, null)
+//                    context.startActivity(intent)
+//                }
+//                .setNegativeButton("Cancel", null)
+//                .show()
         }
     }
 }
