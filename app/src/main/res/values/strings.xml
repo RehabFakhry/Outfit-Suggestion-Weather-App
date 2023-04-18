@@ -11,7 +11,7 @@
     <string name="cold_weather">cold</string>
     <string name="autumn_weather">Cloudy</string>
     <string name="calm_weather">Calm</string>
-    <string name="sunny_weather">Sunny</string>
+    <string name="hot_weather">Extremely Hot</string>
     <string name="city_and_temerature">city and temerature</string>
     <string name="feels_like">feels_like</string>
     <string name="humidity">humidity</string>
