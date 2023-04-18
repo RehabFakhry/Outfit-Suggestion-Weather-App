@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Outfit Suggestion Weather App</string>
+    <string name="failed_to_get_weather">Failed to get weather data</string>
+    <string name="what_to_wear_today">What to wear Today?</string>
+    <string name="current_date">dd/mm/yy</string>
+    <string name="current_day">tue</string>
+    <string name="sunny">Sunny</string>
+    <string name="spring">Spring</string>
+    <string name="windy">Windy</string>
+    <string name="cloudy">Cloudy</string>
+    <string name="cold_weather">cold</string>
+    <string name="autumn_weather">Cloudy</string>
+    <string name="calm_weather">Calm</string>
+    <string name="sunny_weather">Sunny</string>
+    <string name="city_and_temerature">city and temerature</string>
+    <string name="feels_like">feels_like</string>
+    <string name="humidity">humidity</string>
+    <string name="pressure">pressure</string>
+    <string name="tempertaure">Temperature</string>
+    <string name="cityname">cityName</string>
 </resources>
