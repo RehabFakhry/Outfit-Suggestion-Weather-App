@@ -2,7 +2,6 @@ package com.example.outfitsuggestionweatherapp.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.outfitsuggestionweatherapp.R
 
 class ImagePreferenceManager(context: Context) {
     companion object {
@@ -29,23 +28,8 @@ class ImagePreferenceManager(context: Context) {
     }
 
     private fun getSavedImages(): List<Int> {
-        val drawableIds = listOf(
-            R.drawable.image_1,
-            R.drawable.image_2,
-            R.drawable.image_4,
-            R.drawable.image_8
-        )
-
         val savedImagesString = sharedPreferences.getString(KEY_IMAGES, "")
-        val savedImageIds =
-            savedImagesString?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
-        val unsavedImageIds = drawableIds.filterNot { savedImageIds.contains(it) }
-        val allImageIds = if (unsavedImageIds.isEmpty()) savedImageIds
-        else {
-            savedImageIds + unsavedImageIds.take(unsavedImageIds.size - 1)
-        }
-        saveImages(allImageIds)
-        return allImageIds
+        return savedImagesString?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
     }
 }
 
