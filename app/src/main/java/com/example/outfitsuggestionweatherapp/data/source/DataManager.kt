@@ -2,7 +2,7 @@ package com.example.outfitsuggestionweatherapp.data.source
 
 import com.example.outfitsuggestionweatherapp.R
 
-object ImageOutfits {
+object DataManager {
     val winterOutfits = listOf(
         R.drawable.image_winter_1,
         R.drawable.image_winter_2,
@@ -33,11 +33,4 @@ object ImageOutfits {
         R.drawable.image_autumn_3,
         R.drawable.image_autumn_4
     )
-}
-
-object LottieAnimations {
-    const val winterAnimation = R.raw.winter
-    const val springAnimation = R.raw.spring
-    const val summerAnimation = R.raw.sunny
-    const val autumnAnimation = R.raw.autumn
 }
