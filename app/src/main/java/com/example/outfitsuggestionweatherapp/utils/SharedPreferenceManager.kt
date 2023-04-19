@@ -3,7 +3,7 @@ package com.example.outfitsuggestionweatherapp.utils
 import android.content.Context
 import android.content.SharedPreferences
 
-class ImagePreferenceManager(context: Context) {
+class SharedPreferenceManager(context: Context) {
     companion object {
         private const val PREF_NAME = "image_pref"
         private const val KEY_IMAGES = "images"
@@ -18,15 +18,15 @@ class ImagePreferenceManager(context: Context) {
         sharedPreferences.edit().putString(KEY_IMAGES, imageIds).apply()
     }
 
+    private fun getSavedImages(): List<Int> {
+        val savedImagesString = sharedPreferences.getString(KEY_IMAGES, "")
+        return savedImagesString?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+    }
+
     fun getRandomImage(): Int? {
         val images = getSavedImages()
         return if (images.isNotEmpty()) {
             images.random()
         } else null
-    }
-
-    private fun getSavedImages(): List<Int> {
-        val savedImagesString = sharedPreferences.getString(KEY_IMAGES, "")
-        return savedImagesString?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
     }
 }
