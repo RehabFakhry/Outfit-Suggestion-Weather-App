@@ -2,20 +2,16 @@ package com.example.outfitsuggestionweatherapp.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Looper
-import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.outfitsuggestionweatherapp.data.source.WeatherDataFetcher
+import com.example.outfitsuggestionweatherapp.data.source.WeatherDataResponse
 import com.example.outfitsuggestionweatherapp.utils.Constants
 import com.google.android.gms.location.*
 
-class LocationManager (private val context: Context, private val weatherDataFetcher: WeatherDataFetcher) {
+class LocationManager (private val context: Context, private val weatherDataResponse: WeatherDataResponse) {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -32,16 +28,31 @@ class LocationManager (private val context: Context, private val weatherDataFetc
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 val location = locationResult.lastLocation ?: return
-                weatherDataFetcher.getWeatherData(
-                    location.latitude, location.longitude
-                ) { weatherResponse, exception ->
-                    (context as MainActivity).runOnUiThread {
-                        (context as MainActivity).updateUIWithWeatherDetails(weatherResponse, exception)
-                        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+                weatherDataResponse.getWeatherData(
+                    location.latitude, location.longitude,
+                    onResponse = { weatherResponse ->
+                        (context as MainActivity).runOnUiThread {
+                            (context as MainActivity).updateUIWithWeatherDetails(
+                                weatherResponse,
+                                null
+                            )
+                            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+                        }
+                    },
+                    onFailure = { exception ->
+                        (context as MainActivity).runOnUiThread {
+                            (context as MainActivity)
+                                .updateUIWithWeatherDetails(null, exception)
+                            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+                        }
                     }
-                }
+                )
             }
         }
+        checkPermission()
+    }
+
+    private fun checkPermission() {
         if (ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -58,6 +69,12 @@ class LocationManager (private val context: Context, private val weatherDataFetc
                 locationCallback,
                 Looper.getMainLooper()
             )
+        }
+    }
+}
+
+
+// make alert dialog to handel if permissions didn't granted
 //            AlertDialog.Builder(context)
 //                .setTitle("Enable location")
 //                .setMessage("Please enable location access in order to use this Application.")
@@ -69,6 +86,5 @@ class LocationManager (private val context: Context, private val weatherDataFetc
 //                }
 //                .setNegativeButton("Cancel", null)
 //                .show()
-        }
-    }
-}
+
+
