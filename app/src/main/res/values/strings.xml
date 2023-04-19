@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Outfit Suggestion Weather App</string>
+    <string name="api_key">545c025aec18c326d80f41ac17e459b0</string>
     <string name="failed_to_get_weather">Failed to get weather data</string>
     <string name="what_to_wear_today">What to wear Today?</string>
     <string name="current_date">dd/mm/yy</string>
@@ -18,4 +19,5 @@
     <string name="pressure">pressure</string>
     <string name="tempertaure">Temperature</string>
     <string name="cityname">cityName</string>
+    <string name="what_should_i_wear_today">what should I wear today</string>
 </resources>
