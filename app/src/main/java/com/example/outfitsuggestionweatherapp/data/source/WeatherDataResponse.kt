@@ -1,5 +1,6 @@
 package com.example.outfitsuggestionweatherapp.data.source
 
+import com.example.outfitsuggestionweatherapp.BuildConfig
 import com.example.outfitsuggestionweatherapp.data.weatherModel.WeatherDetails
 import com.example.outfitsuggestionweatherapp.data.weatherModel.WeatherResponse
 import com.example.outfitsuggestionweatherapp.utils.Constants
@@ -8,13 +9,15 @@ import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
 
-class WeatherDataFetcher {
-
+class WeatherDataResponse {
     fun getWeatherData(
-        latitude: Double, longitude: Double, callback: (WeatherResponse?, Exception?) -> Unit
+        latitude: Double,
+        longitude: Double,
+        onResponse: (WeatherResponse) -> Unit,
+        onFailure: (Exception) -> Unit
     ) {
         val url =
-            "${Constants.BASE_URL}$latitude&lon=$longitude" + "&appid=${Constants.API_KEY}&units=metric"
+            "${Constants.BASE_URL}lat=$latitude&lon=$longitude&appid=${BuildConfig.API_KEY}&units=metric"
         val client = OkHttpClient.Builder().addInterceptor(
             HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
         ).build()
@@ -22,23 +25,27 @@ class WeatherDataFetcher {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback(null, e)
+                onFailure(Exception(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
                 try {
+                    if (!response.isSuccessful) {
+                        onFailure(Exception("Response code: ${response.code}"))
+                        return
+                    }
                     val responseBody: ResponseBody? = response.body
                     if (responseBody != null) {
                         val json = responseBody.string()
                         val dataResult = Gson().fromJson(json, WeatherResponse::class.java)
-                        callback(dataResult, null)
+                        onResponse(dataResult)
                     } else {
-                        callback(null, Exception("Response body is null"))
+                        onFailure(Exception("Response body is null"))
                     }
                 } catch (e: Exception) {
-                    callback(null, e)
+                    onFailure(e)
                 }
             }
         })
     }
-    }
+}
